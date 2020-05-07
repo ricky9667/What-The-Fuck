@@ -4,9 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
+import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -15,7 +14,6 @@ class MainActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
     private val WTF_URL = "https://yesno.wtf/api"
-    var FORCE = "?="
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,8 +21,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClick(view: View) {
+
+        val answerTextView = findViewById<TextView>(R.id.answerTextView)
+        answerTextView.text = "??????"
+        answerTextView.setTextColor(resources.getColor(android.R.color.black))
+
+        var wtfUrl = WTF_URL
+        val button: Button = view as Button
+
+        if (button.id != R.id.randomButton) {
+            wtfUrl += ("?force=" + button.text)
+        }
+
         val request = Request.Builder()
-                .url(WTF_URL)
+                .url(wtfUrl)
                 .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -34,27 +44,24 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful)
-                        throw IOException("Unexpected Code $response")
+                if (!response.isSuccessful)
+                    throw IOException("Unexpected Code $response")
 
-                    val jsonString: String = response.body?.string() ?: "Response is null"
-                    Log.i("WTF json", jsonString)
+                val jsonString: String = response.body?.string() ?: "Response is null"
+                Log.i("WTF json", jsonString)
 
-                    val json = JSONObject(jsonString)
-//                    Log.i("WTF Data", json.toString())
+                val json = JSONObject(jsonString)
 
-                    val answer: String = json.getString("answer")
-                    val forced: String = json.getString("forced")
-                    val imageUrl: String = json.getString("image")
+                val answer: String = json.getString("answer")
+                val forced: String = json.getString("forced")
+                val imageUrl: String = json.getString("image")
 
-                    Log.i("WTF Answer", answer)
-                    Log.i("WTF Forced", forced)
-                    Log.i("WTF Image", imageUrl)
+                Log.i("WTF Answer", answer)
+                Log.i("WTF Forced", forced)
+                Log.i("WTF Image", imageUrl)
 
-                    runOnUiThread {
-                        setResult(answer)
-                    }
+                runOnUiThread {
+                    setResult(answer)
                 }
             }
         })
@@ -80,11 +87,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             else -> {
-                answerTextView.text = "Loading"
+                answerTextView.text = "Loading..."
                 answerTextView.setTextColor(resources.getColor(android.R.color.black))
             }
-
         }
     }
-
 }
