@@ -107,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         Glide.with(this)
             .load(url)
             .centerCrop()
+            .placeholder(R.drawable.place_holder)
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
                     e: GlideException?,
